@@ -1,0 +1,248 @@
+﻿@section css
+{
+
+    <link href="~/Asset/css/bootstrap.css" rel="stylesheet" />
+    @*<link href="~/Asset/css/style.css" rel="stylesheet" />*@
+    @*<link href="~/Asset/css/wickedpicker.css" rel="stylesheet" />*@
+}
+
+@{
+    ViewBag.Title = "ViewStudentResult";
+}
+
+
+
+<div>
+    
+  
+    
+    <div class="container" >
+
+        <div class="row">
+            <form id="viewStudentResult">
+                <div class="banner-top">
+                    <h3 style="color:white">View Result</h3>
+                    <div class="banner-bottom">
+
+
+
+                        <div class="bnr-one">
+                            <div class="bnr-left">
+                                <p><label for="StudentId" style="color:white">Student Reg. No</label></p>
+                            </div>
+                            <div class="bnr-right">
+                                <select id="StudentId" name="StudentId">
+                                    <option value="">Select.....</option>
+                                    @foreach (var student in ViewBag.Students)
+                                    {
+                                        <option value="@student.Id">@student.RegistrationNo</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+
+                        <div class="bnr-one">
+                            <div class="bnr-left" style="color:white">
+                                <p><label for="Name">Name</label></p>
+                            </div>
+                            <div class="bnr-right">
+                                <input type="text" id="Name" name="Name" disabled><br>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="bnr-one">
+                            <div class="bnr-left" style="color:white">
+                                <p><label for="Email">Email</label></p>
+                            </div>
+                            <div class="bnr-right">
+                                <input type="text" id="Email" name="Email" disabled><br>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="bnr-one">
+                            <div class="bnr-left" style="color:white">
+                                <p><label for="Department">Department</label></p>
+                            </div>
+                            <div class="bnr-right">
+                                <input type="text" id="Department" name="Department" disabled />
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="bnr-btn" >
+                            <input type="submit" value="Make PDF" onclick="myPrint();" />
+                        </div>
+                    </div>
+
+                </div>
+                
+               
+
+                <table border="1" width="75%">
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Grade</th>
+                    </tr>
+                    <tbody id="myData"></tbody>
+
+                </table>
+            </form>
+
+        </div>
+
+    </div>
+    
+    
+
+    <div id="printDiv">
+        <div id="hiddentDiv" style="border:2px solid black;margin-left:100px;margin-right:100px; width:800px;height:1000px;display:none;">
+
+            <h3 class="alert-danger" style="color:#0077b3;text-align:center;font-size:30px">University Managment System</h3>
+            <h4 class="alert-danger" style="color:#0077b3;text-align:center;font-size:30px">Student Result Sheet</h4>
+            <hr style="width:70%; line-height:30px;margin-top:-40px;margin-bottom:20px;" />
+            
+            <br />
+            <br />
+            <div class="row" style="padding-right:20px;">
+                <div class="col-lg-3"></div>
+                <div class="col-lg-3">
+                   
+                    <table class="table" style="margin-right:20px; font-size:20px; padding-left:30px; width:70%; ">
+
+                        <tr>
+                            <td style="width:40%"><label style="font: 20px bold black; text-align: left;" >Name  </label></td>
+                            <td style=" width:60%"><p id="printName" style="color: #005580; text-align:left; "></p></td>
+
+                        </tr>
+
+
+                        <tr>
+                            <td style="width:40%"><label style="font: 20px bold black; text-align: left;">Email  </label></td>
+                            <td style=" width:60%"><p style="color:#005580;" id="resultEmail" text-align:left;></p></td>
+                        </tr>
+                        <tr>
+                            <td style="width:40%"><label style="font: 20px bold black; text-align: left;">Department  </label></td>
+                            <td style=" width:60%"><p style="color:#005580;" id="resultDept" text-align:left;></p></td>
+                        </tr>
+                    </table>
+                    <br />
+                    <br />
+                    <br />
+                    @*<hr>*@
+                </div>
+                <div class="col-lg-6"></div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-3"></div>
+                <div class="col-lg-6">
+                    
+                    <table border="1" class="table" style="width: 100%; font-size: 20px; border-collapse: collapse; text-align: center;">
+                        @*<thead>*@
+                     
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Grade</th>
+                                
+                            </tr>
+                        
+                        @*</thead>*@
+                        <tbody id="resultPDFTbody"></tbody>
+                        
+                    </table>
+                  
+                </div>
+                <div class="col-lg-3"></div>
+            </div>
+            <br/>
+            <br />
+            <br />
+            <br />
+            <br />
+            <p align="center">&copy; @DateTime.Now.Year Digiminds</p>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+<script src="~/Scripts/jquery-2.2.3.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#StudentId").change(function () {
+                var stId = $("#StudentId").val();
+
+                $("#myData").empty();
+                var json = { studentId: stId };
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GetStudentById", "StudentResult")',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(json),
+                    success: function (data) {
+                        //alert(data);
+
+                        var name = data.Name;
+                        var email = data.Email;
+                        var dept = data.Department;
+                        $("#Name").val(name);
+                        $("#Email").val(email);
+                        $("#Department").val(dept);
+                    }
+                });
+
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GetStudentResultByStudentId", "StudentResultView")',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(json),
+                    success: function (data) {
+
+
+                        $.each(data, function (index, value) {
+
+                            var row = $("<tr><td>" + value.Code + "</td><td>" + value.Name + "</td><td>" + value.Grade + "</td></tr>");
+                            $("#myData").append(row);
+                            $("#resultPDFTbody").append('<tr><td>' + value.Code + '</td><td>' + value.Name + '</td><td>' + value.Grade + '</td></tr>');
+                        });
+                    }
+                });
+
+            });
+
+        });
+    </script>
+<script language="javascript">
+
+
+    function myPrint() {
+        var Name = document.getElementById("Name").value;
+        document.getElementById("printName").innerHTML = ': ' + Name;
+
+        var Email = document.getElementById("Email").value;
+        document.getElementById("resultEmail").innerHTML = ': ' + Email;
+
+        var DeptName = document.getElementById("Department").value;
+        document.getElementById("resultDept").innerHTML = ': ' + DeptName;
+
+        //var RegNo = document.getElementById("RegNo").value;
+        //document.getElementById("printRegNo").innerHTML = ': ' + RegNo;
+
+        var myPrintContent = document.getElementById('printDiv');
+        var myPrintWindow = window.open('left=300,top=100,width=400,height=400');
+        myPrintWindow.document.write(myPrintContent.innerHTML);
+        myPrintWindow.document.getElementById('hiddentDiv').style.display = 'block';
+        myPrintWindow.document.close();
+        myPrintWindow.focus();
+        myPrintWindow.print();
+        myPrintWindow.close();
+        location.reload();
+        return false;
+    }
+</script>
+
+}
